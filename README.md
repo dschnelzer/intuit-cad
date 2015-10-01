@@ -1,5 +1,5 @@
 # intuit-cad
-node package for obtaining building a SAML assertion message and making calls to intuit's Customer Account Data (CAD) API.  Built with promises ([KrisKowal's Q Library](https://github.com/kriskowal/q)) in mind this makes implementing/chaining very easy and straightforward.   Written in pure javascript this makes extension of library easy and maintainable.  
+node package for building a SAML assertion message and making calls to intuit's Customer Account Data (CAD) API.  Built with promises ([KrisKowal's Q Library](https://github.com/kriskowal/q)) in mind this makes implementing/chaining very easy and straightforward.   Written in pure javascript this makes extension of library easy and maintainable.  
 
 
 ##Getting Started
@@ -59,6 +59,22 @@ if none of the environment variables are set it will take whatever you set it to
 >`consumerKey:process.env.INTUIT_CONSUMER_KEY || 'CONSUMERKEY'`
 
 it will use `CONSUMERKEY` as the value of `consumerKey`.
+
+##Options
+There are a certain amount of options that are available.  Right now, the only one is setting the logging level. To use options, you can pass an options object as a argument in the instatiation of the `IntuitCad` object.
+
+####logLevel
+The `logLevel` option allows helps you debug your code by providing output from the `intuit-cad` library.  It has 3 levels: `info`, `debug`, and `error`.  
+
+#####Default Value:
+`info`
+
+######Example:
+```javascript
+...
+  var options = {logLevel: 'debug'};
+  var client = new IntuitCad(authCredentials, options);
+```
 ##API Methods Available
 ###institutions
 this returns all the institutions that Intuit CAD system supports (around 19,000 of them)
@@ -170,20 +186,28 @@ or chained with `getCustomerAccounts`
 ```javascript
 client.getCustomerAccounts()
   .then(function(accounts){
-    var deleteAccountId = accounts[0].accountId;
-    
-    client.deleteAccount(deleteAccountId)
-      .then(function(){
-        console.log('deleted account');
-      },
-      function(reason){});
+    return client.deleteAccount(accounts.accounts[0].accountId)
   })
+  .then(function(response){
+    console.log('done delete: ', response);
+  },
+  function(reason){
+    console.log('delete failure reason: ', reason);
+  });
+```
+###deleteCustomer()
+This call deletes the currently authenticated customer.
 
+#####usage
+```javascript
+client.deleteCustomer()
+  .then(function(){
+  console.log('deleted customer');
+  },
+  function(reason){});
 ```
 
 ##Coming Soon...Really soon
-####deleteCustomer
-deletes all customers from Intuit's database
 ####updateAccountType(account_id)
 updates the account type of an account.  This is only used when the category of an account gets categorized automatically to 'other'
 ####getInvestmentPositions
@@ -194,15 +218,14 @@ Since all of the methods return a promise we can chain them like the documentati
 ```javascript
 client.getCustomerAccounts()
   .then(function(accounts){
-  
-    var deleteAccountId = accounts[0].accountId;
-
-    client.deleteAccount(deleteAccountId)
-      .then(function(){
-        console.log('deleted account');
-      },
-      function(reason){});
+    return client.deleteAccount(accounts.accounts[0].accountId)
   })
+  .then(function(response){
+    console.log('done delete: ', response);
+  },
+  function(reason){
+    console.log('delete failure reason: ', reason);
+  });
 ```
 
 ##Example Usage
@@ -237,15 +260,15 @@ client.getAccount(400109423068)
 //Chainng function example.    
 client.getCustomerAccounts()
   .then(function(accounts){
-
-    var deleteAccountId = accounts[0].accountId;
-
-    client.deleteAccount(deleteAccountId)
-      .then(function(){
-        console.log('deleted account');
-      },
-      function(reason){});
+    return client.deleteAccount(accounts.accounts[0].accountId)
   })
+  .then(function(response){
+    console.log('done delete: ', response);
+  },
+  function(reason){
+    console.log('delete failure reason: ', reason);
+  });
+
 
 ```
 
